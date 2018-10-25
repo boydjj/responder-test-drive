@@ -1,6 +1,7 @@
 import logging
 import time
 
+import aiohttp
 import responder
 
 logging.basicConfig(level=logging.INFO)
@@ -23,7 +24,12 @@ class EchoView:
         time.sleep(0.06)
         logger.info(f'counter: {EchoView.counter}')
 
-    def on_get(self, req, resp):
+    async def get_my_ip(self):
+        async with aiohttp.ClientSession() as session:
+            async with session.get('http://ifconfig.co/ip') as resp:
+                return await resp.text()
+
+    async def on_get(self, req, resp):
         response = {'url': req.full_url}
 
         args = {}
@@ -44,13 +50,14 @@ class EchoView:
         if req.headers:
             response['headers'] = headers
 
-        api.requests.get()
-
+        my_ip = await self.get_my_ip()
+        response['my_ip'] = my_ip.strip()
         self.increment_counter()
         resp.media = response
 
     def __del__(self):
         logger.info(f'Killing instance of EchoView, counter={EchoView.counter}')
+
 
 if __name__ == '__main__':
     logger.info('Kicking off new app...')
