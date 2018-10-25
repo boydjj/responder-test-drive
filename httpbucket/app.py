@@ -11,7 +11,14 @@ api = responder.API()
 
 @api.route('/get')
 class EchoView:
+    counter = 0
+
+    def __init__(self):
+        logger.info(f'Starting new instance of EchoView, counter={EchoView.counter}')
+
     def on_get(self, req, resp):
+        EchoView.counter += 1
+
         response = {'url': req.full_url}
 
         args = {}
@@ -27,7 +34,6 @@ class EchoView:
         headers = {}
 
         for k, v in req.headers.items():
-            logger.info(f'{k}, {v}')
             headers[k.title()] = v
 
         if req.headers:
@@ -35,6 +41,8 @@ class EchoView:
 
         resp.media = response
 
+    def __del__(self):
+        logger.info(f'Killing instance of EchoView, counter={EchoView.counter}')
 
 if __name__ == '__main__':
     logger.info('Kicking off new app...')
