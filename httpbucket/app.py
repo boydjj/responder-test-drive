@@ -10,29 +10,30 @@ api = responder.API()
 
 
 @api.route('/get')
-def echo(req, resp):
-    response = {'url': req.full_url}
+class EchoView:
+    def on_get(self, req, resp):
+        response = {'url': req.full_url}
 
-    args = {}
-    for k, v in req.params.items_list():
-        if len(v) == 1:
-            args[k] = v[0]
-        else:
-            args[k] = v
+        args = {}
+        for k, v in req.params.items_list():
+            if len(v) == 1:
+                args[k] = v[0]
+            else:
+                args[k] = v
 
-    if args:
-        response['args'] = args
+        if args:
+            response['args'] = args
 
-    headers = {}
+        headers = {}
 
-    for k, v in req.headers.items():
-        logger.info(f'{k}, {v}')
-        headers[k.title()] = v
+        for k, v in req.headers.items():
+            logger.info(f'{k}, {v}')
+            headers[k.title()] = v
 
-    if req.headers:
-        response['headers'] = headers
+        if req.headers:
+            response['headers'] = headers
 
-    resp.media = response
+        resp.media = response
 
 
 if __name__ == '__main__':
