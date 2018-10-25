@@ -1,4 +1,5 @@
 import logging
+import time
 
 import responder
 
@@ -16,9 +17,13 @@ class EchoView:
     def __init__(self):
         logger.info(f'Starting new instance of EchoView, counter={EchoView.counter}')
 
-    def on_get(self, req, resp):
+    @api.background.task
+    def increment_counter(self):
         EchoView.counter += 1
+        time.sleep(0.06)
+        logger.info(f'counter: {EchoView.counter}')
 
+    def on_get(self, req, resp):
         response = {'url': req.full_url}
 
         args = {}
@@ -39,6 +44,9 @@ class EchoView:
         if req.headers:
             response['headers'] = headers
 
+        api.requests.get()
+
+        self.increment_counter()
         resp.media = response
 
     def __del__(self):
